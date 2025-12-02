@@ -37,6 +37,7 @@ The tool provides an intuitive GUI-based system for selecting and installing var
 ### 📂 Context Menu Categories
 
 #### Desktop Enhancements
+
 - **Administration** - System administration utilities and shortcuts
 - **Control Panel** - Quick access to Control Panel features
 - **Data Cleaning** - Disk cleanup and maintenance tools
@@ -48,6 +49,7 @@ The tool provides an intuitive GUI-based system for selecting and installing var
 - **CD/DVD Tray** - Optical drive management
 
 #### File & Folder Operations
+
 - **Change Attributes** - Modify file/folder attributes
 - **Check Drive** - Disk checking and verification
 - **Copy to Clipboard** - Enhanced clipboard operations
@@ -67,6 +69,13 @@ The tool provides an intuitive GUI-based system for selecting and installing var
 - **Security** - Advanced security options
 - **Show/Hide Files** - File visibility toggle
 
+## System Requirements
+
+- **Windows PowerShell** 5.1 or **PowerShell Core** 6.0+
+- **Windows 10/11** (AMD64 architecture only)
+- **Administrator privileges** (required for registry modifications)
+- **.NET Framework** for system operations
+
 ## 💡 Quick Start
 
 >[!NOTE]
@@ -75,7 +84,7 @@ The tool provides an intuitive GUI-based system for selecting and installing var
 
 ### Basic Installation
 
-1. Open PowerShell as Administrator
+1. Open PowerShell
    - Right-click on the Windows start menu and select PowerShell, or press `Win + S` and type PowerShell
 
 2. Run the installation script:
@@ -85,20 +94,13 @@ irm https://sem.scripts.wiki | iex; menu
 ```
 
 This will:
-- Download the latest release from GitHub
-- Automatically extract the necessary files
-- Launch the GUI menu selector in administrator mode
 
-## 🔧 Installation & Setup
+- Download Latest Release: Retrieve the most recent version of the application directly from its GitHub repository.
+- Extract Files Automatically: Unpack and organize the necessary files.
+- Request Administrator Privileges: Prompt the user for elevated permissions to perform system-level operations, specifically for writing to the Windows registry and creating copies of cmd.exe and powershella.exe (cmda.exe and powershella.exe) that can be launched with administrator rights.
+- Launch TUI Menu Selector: Open a text-based interface that allows the user to navigate and select menu options from the terminal.
 
-### System Requirements
-
-- **Windows PowerShell** 5.1 or **PowerShell Core** 6.0+
-- **Windows 10/11** (AMD64 architecture only)
-- **Administrator privileges** (required for registry modifications)
-- **.NET Framework** for system operations
-
-### Parameter Reference
+## 🔧 Parameter Reference
 
 The `menu` function accepts the following parameters:
 
@@ -111,7 +113,7 @@ The `menu` function accepts the following parameters:
 | `-log` | `-l` | switch | Enable logging in $env:ProgramData | |
 | `-all` | `-a` | switch | Auto-select all modules | |
 
-## 📝 Usage & Parameters
+## 📝 Usage
 
 ### Standard Installation
 
@@ -163,6 +165,7 @@ irm https://sem.scripts.wiki | iex; menu -remove -pause
 The project includes 28+ registry modules organized into two main categories:
 
 **Desktop Context Menu** (9 modules)
+
 - Desktop_Administration.reg
 - Desktop_ControlPanel.reg
 - Desktop_DataClean.reg
@@ -174,11 +177,13 @@ The project includes 28+ registry modules organized into two main categories:
 - Desktop_TrayOfCDrom.reg
 
 **File/Folder Context Menu** (19+ modules)
+
 - Menu_*.reg files for various operations and utilities
 
 ### Selecting Modules
 
 During installation, the GUI will present all available modules. You can:
+
 - Select specific modules for installation
 - Use `-all` flag to install everything at once
 - Customize your selection in the interactive menu
@@ -199,13 +204,6 @@ irm "full_path/download.ps1" | iex; menu -local
 irm https://sem.scripts.wiki | iex; menu -lang 'en-US'
 ```
 
-### Partial Installation / Need to Remove
-
-```powershell
-# Completely remove all SEM changes
-irm https://sem.scripts.wiki | iex; menu -remove
-```
-
 ### Enable Logging for Debugging
 
 ```powershell
@@ -219,7 +217,7 @@ irm https://sem.scripts.wiki | iex; menu -log -pause
 
 ### Installation Structure
 
-```
+``` bash
 C:\ProgramData\simple-explorer-menu\
 ├── core/
 │   ├── core.ps1         # Core functionality
@@ -245,6 +243,7 @@ C:\ProgramData\simple-explorer-menu\
 ### Registry Management
 
 All modifications are registry-based, stored in:
+
 - `HKEY_CLASSES_ROOT\*\shell` - File context menus
 - `HKEY_CLASSES_ROOT\Folder\shell` - Folder context menus
 - `HKEY_CLASSES_ROOT\DesktopBackground\shell` - Desktop context menus
@@ -252,6 +251,7 @@ All modifications are registry-based, stored in:
 ### Safe Removal
 
 The `irm https://sem.scripts.wiki | iex; menu -remove` command:
+
 1. Deletes all added registry entries
 2. Reverts to original Explorer menu state
 3. Restarts Windows Explorer to apply changes
@@ -264,6 +264,7 @@ This project is provided as-is for educational and personal use. Please ensure c
 ## 🤝 Contributing
 
 We welcome contributions, bug reports, and feature requests! Feel free to:
+
 - Submit issues for bugs or feature requests
 - Fork and create pull requests with improvements
 - Suggest new context menu modules
@@ -271,4 +272,4 @@ We welcome contributions, bug reports, and feature requests! Feel free to:
 
 ---
 
-**Made with ❤️ by Segfault**
+## Made with ❤️ by Segfault
