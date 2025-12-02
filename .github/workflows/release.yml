@@ -1,0 +1,53 @@
+name: 'Release'
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: write-all
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    name: 'Release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: 'Release'
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        with:
+          semantic_version: 24.2.1
+          branch: main
+          extra_plugins: |
+            @semantic-release/commit-analyzer@13.0.1
+            @semantic-release/exec@6.0.3
+            @semantic-release/changelog@6.0.3
+            conventional-changelog-conventionalcommits@8.0.0
+
+      - name: 'Create ZIP archive'
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          zip -r SEM.zip . -x ".git/*" ".gitignore" ".github/*"
+
+      - name:  Echo release ver
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          echo ${{ steps.semantic.outputs.new_release_version }}
+
+      - name: 'Upload ZIP to release'
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.semantic.outputs.new_release_version }}
+          files: SEM.zip
+          append_body: true
