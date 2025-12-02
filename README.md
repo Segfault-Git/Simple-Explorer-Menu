@@ -212,7 +212,7 @@ irm https://sem.scripts.wiki | iex; menu -remove
 # Install with logging enabled to troubleshoot issues
 irm https://sem.scripts.wiki | iex; menu -log -pause
 
-# Check the generated .log file in the $env:ProgramData directory
+# Check the generated .log file in the C:\ProgramData directory
 ```
 
 ## ⚙️ Technical Details
@@ -220,7 +220,7 @@ irm https://sem.scripts.wiki | iex; menu -log -pause
 ### Installation Structure
 
 ```
-$env:ProgramData\simple-explorer-menu\
+C:\ProgramData\simple-explorer-menu\
 ├── core/
 │   ├── core.ps1         # Core functionality
 │   └── ui.ps1           # GUI and UI components
