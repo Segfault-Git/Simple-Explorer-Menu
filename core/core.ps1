@@ -27,13 +27,13 @@ function Test-Admin {
 }
 
 function Restart-ExplorerAsUser {
-	Get-Process -Name explorer -ErrorAction SilentlyContinue | Stop-Process -Force
+	$proc = Get-Process -Name explorer -ErrorAction SilentlyContinue 
+	$proc | Stop-Process -Force
+	$proc | Wait-Process -Timeout 5
 	
-	while (Get-Process -Name explorer -ErrorAction SilentlyContinue) {
-		Start-Sleep -Milliseconds 100
-	}
-	
-	cmd /c "start /b explorer.exe"
+    if (-not (Get-Process -Name explorer -ErrorAction SilentlyContinue)) {
+        cmd /c "start /b explorer.exe"
+    }
 }
 
 function Set-OldExplorerMenu {

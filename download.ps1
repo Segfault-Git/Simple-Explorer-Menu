@@ -40,7 +40,7 @@ function menu {
         try {
             $latestReleaseUrl = "https://api.github.com/repos/$username/$repo/releases/latest"
             $headers = @{ "User-Agent" = "PowerShellScript" }
-            $latestRelease = Invoke-WebRequest -Uri $latestReleaseUrl -Headers $headers | ConvertFrom-Json
+            $latestRelease = Invoke-WebRequest -Uri $latestReleaseUrl -Headers $headers -UseBasicParsing | ConvertFrom-Json
             $link = $latestRelease.assets.browser_download_url | Select-String -Pattern "$zip_name" | Select-Object -First 1
             if ($link) {
                 $link = $link.ToString().Trim()
@@ -63,21 +63,42 @@ function menu {
             [string]$savePath,
             [string]$fileName
         )
-        
+
         if (-not (Test-Path $savePath)) { New-Item -ItemType Directory -Path $savePath -Force | Out-Null }
+        $DownloadPath = Join-Path -Path $savePath -ChildPath $fileName
+        if (Test-Path $DownloadPath) { Remove-Item -Path $DownloadPath -Force }
         try {
-            $DownloadPath = Join-Path -Path $savePath -ChildPath $fileName
             (New-Object Net.WebClient).DownloadFile("$releaseZipUrl", "$DownloadPath")
         } catch {
             Write-Host "$fileName is not downloaded. Skipping..." -ForegroundColor Red
+            Write-Host "Please check your network connection or the URL [$releaseZipUrl]" -ForegroundColor Red
             Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-            Write-Host "Please check your network connection or the URL." -ForegroundColor Red
             pause
             exit
         }
     }
     
-    if (!($local)) {
+    $scriptDir = if ($MyInvocation.MyCommand.Path) {
+        Split-Path -Parent $MyInvocation.MyCommand.Path
+    } else {
+        $PWD
+    }
+
+    if ($local) {
+        if (Test-Path $dir) {
+            Remove-Item -Path $dir -Recurse -Force -ErrorAction Stop
+            Write-Host "Deleted existing $dir" -ForegroundColor Yellow
+        }
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        Write-Host "Created $dir" -ForegroundColor Green
+
+        Get-ChildItem -Path $scriptDir -Force | Where-Object {
+            $_.Name -notmatch '^\.' -and $_.Name -ne 'download.ps1'
+        } | ForEach-Object {
+            Write-Host "Copying $($_.Name) to $dir" -ForegroundColor Cyan
+            Copy-Item -Path $_.FullName -Destination $dir -Recurse -Force
+        }
+    } else {
         $releaseZipUrl = Get-GitHubReleaseAsset -username "$username" -repo "$repo" -zip_name "$zip_name"
         if (!($releaseZipUrl)) {
             Write-Host "Failed to fetch the release URL. Exiting..." -ForegroundColor Red
@@ -85,9 +106,8 @@ function menu {
             exit
         }
         $fileName = $releaseZipUrl.Split('/')[-1]
-        $savePath = Join-Path -Path $dir -ChildPath $fileName
-        $zipPath = Join-Path -Path $dir -ChildPath "$zip_name.zip"
-        Download -releaseZipUrl $releaseZipUrl -savePath $savePath -fileName $fileName
+        $zipPath = Join-Path -Path $dir -ChildPath $fileName
+        Download -releaseZipUrl $releaseZipUrl -savePath $dir -fileName $fileName
         if (Test-Path $zipPath) {
             Expand-Archive -Path $zipPath -DestinationPath $dir -Force -ErrorAction Stop
         } else {
