@@ -132,27 +132,36 @@ function Download-ReleaseZip {
 }
 
 function Install-SEMData {
-    $scriptDir = if ($MyInvocation.MyCommand.Path) {
+    $scriptDir = if ($PSCommandPath) {
+        Split-Path -Parent $PSCommandPath
+    } elseif ($MyInvocation.MyCommand.Path) {
         Split-Path -Parent $MyInvocation.MyCommand.Path
     } else {
-        $PWD
+        $null
     }
 
     if ($local) {
-        if (Test-Path $dir) {
-            Remove-Item -Path $dir -Recurse -Force -ErrorAction Stop
-            Write-Host "Deleted existing $dir" -ForegroundColor Yellow
-        }
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        Write-Host "Created $dir" -ForegroundColor Green
+        if (-not $scriptDir -or -not (Test-Path (Join-Path $scriptDir 'regs'))) {
+            Write-Host "-local requires sem.ps1 to be run from the project directory. Falling back to download." -ForegroundColor Yellow
+            $local = $false
+        } else {
+            if (Test-Path $dir) {
+                Remove-Item -Path $dir -Recurse -Force -ErrorAction Stop
+                Write-Host "Deleted existing $dir" -ForegroundColor Yellow
+            }
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            Write-Host "Created $dir" -ForegroundColor Green
 
-        Get-ChildItem -Path $scriptDir -Force | Where-Object {
-            $_.Name -notmatch '^\.' -and $_.Name -ne 'sem.ps1'
-        } | ForEach-Object {
-            Write-Host "Copying $($_.Name) to $dir" -ForegroundColor Cyan
-            Copy-Item -Path $_.FullName -Destination $dir -Recurse -Force
+            Get-ChildItem -Path $scriptDir -Force | Where-Object {
+                $_.Name -notmatch '^\.' -and $_.Name -ne 'sem.ps1'
+            } | ForEach-Object {
+                Write-Host "Copying $($_.Name) to $dir" -ForegroundColor Cyan
+                Copy-Item -Path $_.FullName -Destination $dir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
-    } else {
+    }
+
+    if (-not $local) {
         $releaseZipUrl = Get-GitHubReleaseAsset -Username $username -Repo $repo -ZipName $zip_name
         if (!($releaseZipUrl)) {
             Write-Host "Failed to fetch the release URL. Exiting..." -ForegroundColor Red
@@ -172,7 +181,15 @@ function Install-SEMData {
     }
 }
 
-Install-SEMData
+if ($remove) {
+    if (-not (Test-Path $dir)) {
+        Write-Host "SEM directory not found: $dir" -ForegroundColor Red
+        Write-Host "Nothing to remove." -ForegroundColor Yellow
+        exit
+    }
+} else {
+    Install-SEMData
+}
 
 if ($gui) {
     Add-Type -AssemblyName PresentationFramework
@@ -960,12 +977,6 @@ function Start-RegManager {
 }
 
 # === Main logic ===
-
-if (-not (Test-Admin)) {
-    Write-Error -Message "Script cant get required administrator privileges! Exiting..."
-    pause
-    exit
-}
 
 if (-not $lang -or $lang -notmatch '^[a-z]{2}-[A-Z]{2}$') {
     $lang = (Get-UICulture).Name
