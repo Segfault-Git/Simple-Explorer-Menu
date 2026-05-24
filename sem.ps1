@@ -189,6 +189,33 @@ if ($remove) {
     }
 } else {
     Install-SEMData
+
+    $criticalPaths = @(
+        @{ Path = "$dir\regs"; Name = "Registry files" },
+        @{ Path = "$dir\lang"; Name = "Language files" }
+    )
+
+    $missing = @()
+    foreach ($item in $criticalPaths) {
+        if (-not (Test-Path $item.Path)) {
+            $missing += $item.Name
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-Host "Critical data missing:" -ForegroundColor Red
+        $missing | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
+        Write-Host "Installation cannot continue." -ForegroundColor Red
+        pause
+        exit
+    }
+
+    $regFileCount = (Get-ChildItem -Path "$dir\regs" -Filter "*.reg" -ErrorAction SilentlyContinue).Count
+    if ($regFileCount -eq 0) {
+        Write-Host "No .reg files found in $dir\regs" -ForegroundColor Red
+        pause
+        exit
+    }
 }
 
 if ($gui) {
