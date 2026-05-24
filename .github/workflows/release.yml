@@ -39,15 +39,18 @@ jobs:
         run: |
           zip -r SEM.zip . -x ".git/*" ".gitignore" ".github/*"
 
-      - name:  Echo release ver
+      - name: 'Inject version into sem.ps1'
         if: steps.semantic.outputs.new_release_published == 'true'
         run: |
-          echo ${{ steps.semantic.outputs.new_release_version }}
+          sed -i "s/Version : .*/Version : ${{ steps.semantic.outputs.new_release_version }}/" sem.ps1
+          sed -i 's/\$semVersion = "0.0.0"/$semVersion = "${{ steps.semantic.outputs.new_release_version }}"/' sem.ps1
 
-      - name: 'Upload ZIP to release'
+      - name: 'Upload release assets'
         if: steps.semantic.outputs.new_release_published == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.semantic.outputs.new_release_version }}
-          files: SEM.zip
+          files: |
+            SEM.zip
+            sem.ps1
           append_body: true
