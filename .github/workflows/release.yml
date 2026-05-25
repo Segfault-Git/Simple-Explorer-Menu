@@ -36,6 +36,16 @@ jobs:
             @semantic-release/changelog@6.0.3
             conventional-changelog-conventionalcommits@8.0.0
 
+      - name: 'Delete old dev pre-releases'
+        if: github.ref_name == 'dev'
+        run: |
+          gh release list --limit 50 --json tagName,isPrerelease -q '.[] | select(.isPrerelease) | .tagName' \
+            | grep '^dev-' \
+            | while read -r tag; do
+                echo "Deleting old pre-release: $tag"
+                gh release delete "$tag" --yes --cleanup-tag
+              done
+
       - name: 'Generate dev tag'
         if: github.ref_name == 'dev'
         id: dev
