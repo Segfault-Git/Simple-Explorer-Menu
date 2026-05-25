@@ -7,8 +7,6 @@
 
 #requires -version 5.1
 
-[CmdletBinding()]
-
 param(
     [string]$lang,
     [Alias('r')]
@@ -27,11 +25,32 @@ param(
     [switch]$gui
 )
 
-$username = "Segfault-Git"
-$repo = "Simple-Explorer-Menu"
-$zip_name = "SEM"
 $semVersion = "0.0.0"
 $semReleaseTag = ""
+
+function menu {
+    [CmdletBinding()]
+    param(
+        [string]$lang,
+        [Alias('r')]
+        [switch]$remove,
+        [Alias('p')]
+        [switch]$pause,
+        [Alias('o')]
+        [switch]$old,
+        [Alias('l')]
+        [switch]$log,
+        [Alias('a')]
+        [switch]$all,
+        [switch]$local,
+        [Alias('d')]
+        [string]$dir = "$env:ProgramData\simple-explorer-menu",
+        [switch]$gui
+    )
+
+    $username = "Segfault-Git"
+    $repo = "Simple-Explorer-Menu"
+    $zip_name = "SEM"
 
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Output "SEM needs to be run as Administrator. Attempting to relaunch."
@@ -50,12 +69,12 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $script = if ($PSCommandPath) {
         "& { & '$($PSCommandPath)' $($argList -join ' ') }"
     } else {
-        $semUrl = if ($semReleaseTag) {
-            "https://github.com/$username/$repo/releases/download/$semReleaseTag/sem.ps1"
+        $semUrl = if ($script:semReleaseTag) {
+            "https://github.com/$username/$repo/releases/download/$script:semReleaseTag/sem.ps1"
         } else {
             "https://github.com/$username/$repo/releases/latest/download/sem.ps1"
         }
-        "&([ScriptBlock]::Create((irm $semUrl))) $($argList -join ' ')"
+        "& { irm $semUrl | iex; menu $($argList -join ' ') }"
     }
 
     $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
@@ -1062,3 +1081,9 @@ if ($log) {
 ExitCountdown
 
 Cleaning
+
+}
+
+if ($PSCommandPath -and $MyInvocation.InvocationName -ne '.') {
+    menu @PSBoundParameters
+}
