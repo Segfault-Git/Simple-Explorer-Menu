@@ -36,12 +36,12 @@ jobs:
             @semantic-release/changelog@6.0.3
             conventional-changelog-conventionalcommits@8.0.0
 
-      - name: 'Delete old dev pre-release'
+      - name: 'Delete old pre-release'
         if: github.ref_name == 'dev'
         run: |
-          if gh release view dev >/dev/null 2>&1; then
-            echo "Deleting old pre-release: dev"
-            gh release delete dev --yes --cleanup-tag
+          if gh release view pre >/dev/null 2>&1; then
+            echo "Deleting old pre-release: pre"
+            gh release delete pre --yes --cleanup-tag
           fi
 
       - name: 'Create ZIP archive'
@@ -57,7 +57,7 @@ jobs:
       - name: 'Inject tag into sem.ps1 (dev)'
         if: github.ref_name == 'dev'
         run: |
-          sed -i 's/\$semReleaseTag = ""/$semReleaseTag = "dev"/' sem.ps1
+          sed -i 's/\$semReleaseTag = ""/$semReleaseTag = "pre"/' sem.ps1
 
       - name: 'Upload release assets (main)'
         if: github.ref_name == 'main' && steps.semantic.outputs.new_release_published == 'true'
@@ -73,7 +73,7 @@ jobs:
         if: github.ref_name == 'dev'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: dev
+          tag_name: pre
           prerelease: true
           files: |
             SEM.zip
