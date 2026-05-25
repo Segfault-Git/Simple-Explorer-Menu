@@ -105,7 +105,7 @@ function Get-GitHubReleaseAsset {
         }
         $headers = @{ "User-Agent" = "PowerShellScript" }
         $latestRelease = Invoke-WebRequest -Uri $releaseApiUrl -Headers $headers -UseBasicParsing | ConvertFrom-Json
-        $link = $latestRelease.assets.browser_download_url | Select-String -Pattern "$ZipName" | Select-Object -First 1
+        $link = $latestRelease.assets.browser_download_url | Select-String -Pattern "$ZipName\.zip" | Select-Object -First 1
         if ($link) {
             $link = $link.ToString().Trim()
             Write-Host "Downloading $link" -ForegroundColor Green
