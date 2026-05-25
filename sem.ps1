@@ -7,24 +7,6 @@
 
 #requires -version 5.1
 
-param(
-    [string]$lang,
-    [Alias('r')]
-    [switch]$remove,
-    [Alias('p')]
-    [switch]$pause,
-    [Alias('o')]
-    [switch]$old,
-    [Alias('l')]
-    [switch]$log,
-    [Alias('a')]
-    [switch]$all,
-    [switch]$local,
-    [Alias('d')]
-    [string]$dir = "$env:ProgramData\simple-explorer-menu",
-    [switch]$gui
-)
-
 $semVersion = "0.0.0"
 $semReleaseTag = ""
 
@@ -1082,8 +1064,4 @@ ExitCountdown
 
 Cleaning
 
-}
-
-if ($PSCommandPath -and $MyInvocation.InvocationName -ne '.') {
-    menu @PSBoundParameters
 }
