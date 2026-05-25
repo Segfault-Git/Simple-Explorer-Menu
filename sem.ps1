@@ -32,6 +32,7 @@ $username = "Segfault-Git"
 $repo = "Simple-Explorer-Menu"
 $zip_name = "SEM"
 $semVersion = "0.0.0"
+$semReleaseTag = ""
 
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Output "SEM needs to be run as Administrator. Attempting to relaunch."
@@ -50,7 +51,12 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $script = if ($PSCommandPath) {
         "& { & '$($PSCommandPath)' $($argList -join ' ') }"
     } else {
-        "&([ScriptBlock]::Create((irm https://github.com/$username/$repo/releases/latest/download/sem.ps1))) $($argList -join ' ')"
+        $semUrl = if ($semReleaseTag) {
+            "https://github.com/$username/$repo/releases/download/$semReleaseTag/sem.ps1"
+        } else {
+            "https://github.com/$username/$repo/releases/latest/download/sem.ps1"
+        }
+        "&([ScriptBlock]::Create((irm $semUrl))) $($argList -join ' ')"
     }
 
     $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
@@ -92,9 +98,13 @@ function Get-GitHubReleaseAsset {
     )
 
     try {
-        $latestReleaseUrl = "https://api.github.com/repos/$Username/$Repo/releases/latest"
+        $releaseApiUrl = if ($semReleaseTag) {
+            "https://api.github.com/repos/$Username/$Repo/releases/tags/$semReleaseTag"
+        } else {
+            "https://api.github.com/repos/$Username/$Repo/releases/latest"
+        }
         $headers = @{ "User-Agent" = "PowerShellScript" }
-        $latestRelease = Invoke-WebRequest -Uri $latestReleaseUrl -Headers $headers -UseBasicParsing | ConvertFrom-Json
+        $latestRelease = Invoke-WebRequest -Uri $releaseApiUrl -Headers $headers -UseBasicParsing | ConvertFrom-Json
         $link = $latestRelease.assets.browser_download_url | Select-String -Pattern "$ZipName" | Select-Object -First 1
         if ($link) {
             $link = $link.ToString().Trim()

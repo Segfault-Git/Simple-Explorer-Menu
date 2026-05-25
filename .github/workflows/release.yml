@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   workflow_dispatch:
 
 permissions: write-all
@@ -22,7 +23,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: 'Release'
+      - name: 'Semantic Release (main only)'
+        if: github.ref_name == 'main'
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
         with:
@@ -34,19 +36,28 @@ jobs:
             @semantic-release/changelog@6.0.3
             conventional-changelog-conventionalcommits@8.0.0
 
+      - name: 'Generate dev tag'
+        if: github.ref_name == 'dev'
+        id: dev
+        run: echo "tag=dev-$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
       - name: 'Create ZIP archive'
-        if: steps.semantic.outputs.new_release_published == 'true'
         run: |
           zip -r SEM.zip . -x ".git/*" ".gitignore" ".github/*"
 
-      - name: 'Inject version into sem.ps1'
-        if: steps.semantic.outputs.new_release_published == 'true'
+      - name: 'Inject version into sem.ps1 (main)'
+        if: github.ref_name == 'main' && steps.semantic.outputs.new_release_published == 'true'
         run: |
           sed -i "s/Version : .*/Version : ${{ steps.semantic.outputs.new_release_version }}/" sem.ps1
           sed -i 's/\$semVersion = "0.0.0"/$semVersion = "${{ steps.semantic.outputs.new_release_version }}"/' sem.ps1
 
-      - name: 'Upload release assets'
-        if: steps.semantic.outputs.new_release_published == 'true'
+      - name: 'Inject tag into sem.ps1 (dev)'
+        if: github.ref_name == 'dev'
+        run: |
+          sed -i 's/\$semReleaseTag = ""/$semReleaseTag = "${{ steps.dev.outputs.tag }}"/' sem.ps1
+
+      - name: 'Upload release assets (main)'
+        if: github.ref_name == 'main' && steps.semantic.outputs.new_release_published == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.semantic.outputs.new_release_version }}
@@ -54,3 +65,13 @@ jobs:
             SEM.zip
             sem.ps1
           append_body: true
+
+      - name: 'Upload release assets (dev)'
+        if: github.ref_name == 'dev'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.dev.outputs.tag }}
+          prerelease: true
+          files: |
+            SEM.zip
+            sem.ps1
