@@ -48,24 +48,29 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
         }
     }
 
-    $script = if ($PSCommandPath) {
-        "& { & '$($PSCommandPath)' $($argList -join ' ') }"
+    $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
+    $processCmd = if (Get-Command wt.exe -ErrorAction SilentlyContinue) { "wt.exe" } else { "$powershellCmd" }
+
+    if ($PSCommandPath) {
+        $cmd = "& '$($PSCommandPath)' $($argList -join ' ')"
+        if ($processCmd -eq "wt.exe") {
+            Start-Process $processCmd -ArgumentList "$powershellCmd -ExecutionPolicy Bypass -NoProfile -Command `"$cmd`"" -Verb RunAs
+        } else {
+            Start-Process $processCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"$cmd`"" -Verb RunAs
+        }
     } else {
         $semUrl = if ($script:semReleaseTag) {
             "https://github.com/$username/$repo/releases/download/$script:semReleaseTag/sem.ps1"
         } else {
             "https://github.com/$username/$repo/releases/latest/download/sem.ps1"
         }
-        "& { irm $semUrl | iex; menu $($argList -join ' ') }"
-    }
-
-    $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
-    $processCmd = if (Get-Command wt.exe -ErrorAction SilentlyContinue) { "wt.exe" } else { "$powershellCmd" }
-
-    if ($processCmd -eq "wt.exe") {
-        Start-Process $processCmd -ArgumentList "$powershellCmd -ExecutionPolicy Bypass -NoProfile -Command `"$script`"" -Verb RunAs
-    } else {
-        Start-Process $processCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"$script`"" -Verb RunAs
+        $tmpFile = Join-Path $env:TEMP "sem_elevate.ps1"
+        "irm $semUrl | iex; menu $($argList -join ' ')" | Set-Content $tmpFile -Force
+        if ($processCmd -eq "wt.exe") {
+            Start-Process $processCmd -ArgumentList "$powershellCmd -ExecutionPolicy Bypass -NoProfile -File `"$tmpFile`"" -Verb RunAs
+        } else {
+            Start-Process $processCmd -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File `"$tmpFile`"" -Verb RunAs
+        }
     }
 
     break
