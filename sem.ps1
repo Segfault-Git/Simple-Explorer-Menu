@@ -804,8 +804,7 @@ function Show-Footer {
     [Console]::SetCursorPosition(0, $FooterStartLine)
 
     Write-Host "|==================================================================================|" -ForegroundColor Cyan
-    Write-Host "| [Up/Down] Navigate | [Space] Select  | [A] All  | [N] None  | [H] Help           |" -ForegroundColor Gray
-    Write-Host "| [Left/Right] Page  | [Enter] Execute | [Q] Exit                                  |" -ForegroundColor Gray
+    Write-Host "| [Up/Down]Nav [Space]Sel [A]All [N]None [L/R]Page [Enter]Ok [Q]Quit [H]Help    |" -ForegroundColor Gray
     Write-Host "+==================================================================================+" -ForegroundColor Cyan
 
     if ($SelectedCount -gt 0) {
@@ -833,7 +832,7 @@ function Show-MultiSelectMenu {
         }
 
         $currentSelection = 0
-        $itemsPerPage = 20
+        $itemsPerPage = 15
         $totalItems = $MenuItems.Count
         $totalPages = [Math]::Ceiling($totalItems / $itemsPerPage)
         $currentPage = 0
@@ -857,7 +856,7 @@ function Show-MultiSelectMenu {
             }
             elseif ($currentSelection -ne $previousSelection) {
                 Show-MenuItems -MenuItems $MenuItems -Selected $selected -CurrentSelection $currentSelection -StartIndex $startIndex -EndIndex $endIndex -StartLine 5
-                $footerLine = $endIndex - $startIndex + 10
+                $footerLine = $endIndex - $startIndex + 9
                 [Console]::SetCursorPosition(0, $footerLine)
                 if ($selectedCount -gt 0) {
                     Write-Host "Selected files: $selectedCount of $totalItems" -ForegroundColor Green
