@@ -76,10 +76,6 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     break
 }
 
-$host.UI.RawUI.BackgroundColor = 'Black'
-$host.UI.RawUI.ForegroundColor = 'White'
-Clear-Host
-
 [string]$RegsPath = "$dir\regs"
 [string]$LangPath = "$dir\lang"
 
@@ -1019,6 +1015,10 @@ function Start-RegManager {
 }
 
 # === Main logic ===
+
+$host.UI.RawUI.BackgroundColor = 'Black'
+$host.UI.RawUI.ForegroundColor = 'White'
+Clear-Host
 
 if (-not $lang -or $lang -notmatch '^[a-z]{2}-[A-Z]{2}$') {
     $lang = (Get-UICulture).Name
