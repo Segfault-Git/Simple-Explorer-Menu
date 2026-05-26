@@ -46,7 +46,7 @@ jobs:
 
       - name: 'Create ZIP archive'
         run: |
-          zip -r SEM.zip . -x ".git/*" ".gitignore" ".github/*" "sem.ps1"
+          zip -r SEM.zip . -x ".git/*" ".gitignore" ".github/*" ".releaserc.json" "sem.ps1"
 
       - name: 'Inject version into sem.ps1 (main)'
         if: github.ref_name == 'main' && steps.semantic.outputs.new_release_published == 'true'
