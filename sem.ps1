@@ -793,7 +793,7 @@ function Show-MenuItems {
             Write-Host $paddedLine -ForegroundColor Green -BackgroundColor DarkGray
         } else {
             $color = if ($Selected[$i]) { "Yellow" } else { "White" }
-            Write-Host $paddedLine -ForegroundColor $color
+            Write-Host $paddedLine -ForegroundColor $color -BackgroundColor Black
         }
     }
 }
