@@ -219,17 +219,13 @@ irm https://sem.scripts.wiki | iex; menu -log -pause
 
 ``` bash
 C:\ProgramData\simple-explorer-menu\
-├── core/
-│   ├── core.ps1         # Core functionality
-│   └── ui.ps1           # GUI and UI components
 ├── lang/
 │   ├── en-US.ini        # English localization
 │   └── ru-RU.ini        # Russian localization
 ├── regs/
 │   ├── Desktop_*.reg    # Desktop context menu modules
 │   └── Menu_*.reg       # File/folder context menu modules
-├── setup.ps1            # Main setup script
-└── download.ps1         # Download and bootstrap script
+├── sem.ps1            # Main setup script
 ```
 
 ### Architecture
