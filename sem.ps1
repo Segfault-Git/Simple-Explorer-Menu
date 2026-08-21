@@ -8,7 +8,7 @@
 #requires -version 5.1
 
 $semVersion = "0.0.0"
-$semReleaseTag = ""
+$semReleaseTag = "pre"
 
 function menu {
     [CmdletBinding()]
