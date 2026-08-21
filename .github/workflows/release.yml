@@ -62,7 +62,7 @@ jobs:
 
       - name: 'Upload release assets (main)'
         if: github.ref_name == 'main' && steps.semantic.outputs.new_release_published == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.semantic.outputs.new_release_version }}
           files: |
@@ -72,7 +72,7 @@ jobs:
 
       - name: 'Upload release assets (dev)'
         if: github.ref_name == 'dev'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: pre
           prerelease: true
