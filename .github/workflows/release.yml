@@ -18,23 +18,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
 
       - name: 'Semantic Release (main only)'
         if: github.ref_name == 'main'
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6
         id: semantic
         with:
-          semantic_version: 24.2.1
+          semantic_version: 25.0.9
           branch: main
           extra_plugins: |
             @semantic-release/commit-analyzer@13.0.1
-            @semantic-release/exec@6.0.3
-            @semantic-release/changelog@6.0.3
-            conventional-changelog-conventionalcommits@8.0.0
+            @semantic-release/exec@7.1.0
+            @semantic-release/changelog@7.0.0
+            conventional-changelog-conventionalcommits@10.4.0
 
       - name: 'Delete old pre-release'
         if: github.ref_name == 'dev'
